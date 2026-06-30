@@ -4,11 +4,11 @@ Code to produce the published behavior-regression figure panels for the paper on
 
 ## Data Reference
 
-The source dataset is DANDI dandiset `001871`:
+The source dataset is DANDI dandiset `001871`, version `0.260630.1657`:
 
-https://dandiarchive.org/dandiset/001871
+https://dandiarchive.org/dandiset/001871/0.260630.1657
 
-This repository includes the small published summary tables needed to render the behavior-regression panels. The full archived dataset is referenced through DANDI.
+This repository includes the small published summary tables used to render the behavior-regression panels. It also includes code to regenerate those summary tables from the archived DANDI behavior NWB files.
 
 ## Published Panels
 
@@ -22,10 +22,23 @@ The included scripts produce:
 
 ## Quick Start
 
+Render the checked-in published summary tables:
+
 ```bash
 conda env create -f environment.yml
 conda run -n gradient_motion_multiple_plumes python scripts/render_published_behavior_panels.py
 ```
+
+Regenerate the summary tables from DANDI behavior NWB files:
+
+```bash
+conda run -n gradient_motion_multiple_plumes python scripts/generate_published_summary_tables.py \
+  --download-dandi \
+  --dandi-cache data/dandi_cache/001871 \
+  --output-dir data/generated_summary_tables
+```
+
+Render panels from regenerated summary tables by passing those CSVs to the panel scripts, or replace the checked-in `data/published_panel_tables/*.csv` after verifying the generated values.
 
 Outputs are written to `figures/published_behavior_panels/` by default.
 
@@ -34,9 +47,12 @@ Outputs are written to `figures/published_behavior_panels/` by default.
 The published behavior panels use:
 
 - Time scale: `200 ms`
+- Predictor lookup: `50 ms` before turn start
 - Horizontal position: `30 <= x <= 220 mm`
 - Vertical position: `67 <= y <= 97 mm`
 - Behavioral filter: `facing_upwind and walking_upwind and not near_margin`
 - Predictors: `spatial_gradient`, `odor_velocity`, and `signal`
+- Smooth plume facing-upwind window: `160 <= theta <= 200 degrees`
+- Complex plume facing-upwind window: `150 <= theta <= 210 degrees`
 
 For the cue beta display, the gradient beta is multiplied by `-1`, as recorded in `metadata/published_panel_params.json`.
