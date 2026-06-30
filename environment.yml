@@ -1,0 +1,12 @@
+name: gradient_motion_multiple_plumes
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - matplotlib>=3.7
+  - numpy>=1.24
+  - pandas>=2.0
+  - pyyaml>=6.0
+  - seaborn>=0.12
+  - pytest>=7.0
+  - pip

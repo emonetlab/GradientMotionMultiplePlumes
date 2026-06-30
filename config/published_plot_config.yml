@@ -1,0 +1,27 @@
+colors:
+  cue:
+    gradient: [1.0, 0.498, 0.055]
+    motion: [0.173, 0.627, 0.173]
+  plume:
+    complex: [0.737, 0.741, 0.133]
+    smooth: [0.580, 0.404, 0.741]
+    complex_1a: [0.737, 0.741, 0.133]
+fonts:
+  family: "Arial"
+  title_size: 12
+  axis_label_size: 10
+  tick_label_size: 10
+  legend_size: 10
+  annotation_size: 10
+ticks:
+  direction: "in"
+  length: 3
+  width: 1.5
+  color: "black"
+paper:
+  pdf_fonttype: 42
+  transparent_background: true
+  despine: true
+  grid: false
+save:
+  dpi: 300
