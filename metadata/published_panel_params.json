@@ -6,7 +6,9 @@
     "dandiset_url": "https://dandiarchive.org/dandiset/001871",
     "dandiset_api_url": "https://api.dandiarchive.org/api/dandisets/001871/",
     "development_repo": "SamuelBrudner/plumeGradMotion",
-    "development_commit": "9f9730bed0eaa4a4e35dc59c518413a83e0e6dd4"
+    "development_commit": "9f9730bed0eaa4a4e35dc59c518413a83e0e6dd4",
+    "dandiset_version": "0.260630.1657",
+    "dandiset_version_url": "https://dandiarchive.org/dandiset/001871/0.260630.1657"
   },
   "analysis_filter": {
     "timescale_ms": 200.0,
@@ -20,7 +22,28 @@
       "odor_velocity",
       "signal"
     ],
-    "display_note": "Gradient beta is multiplied by -1 for the cue-beta display panel."
+    "display_note": "Gradient beta is multiplied by -1 for the cue-beta display panel.",
+    "response_offset_s": 0.05,
+    "margin_mm": 15.0,
+    "arena_bounds_quantile": 0.01,
+    "velocity_filter_cutoff_hz": 0.2,
+    "velocity_filter_order": 4,
+    "per_plume_filter_parameters": {
+      "smooth": {
+        "upwind_facing_min": 160.0,
+        "upwind_facing_max": 200.0,
+        "dandi_path_substrings": [
+          "nagel-smoke"
+        ]
+      },
+      "complex": {
+        "upwind_facing_min": 150.0,
+        "upwind_facing_max": 210.0,
+        "dandi_path_substrings": [
+          "smoke-2a"
+        ]
+      }
+    }
   },
   "panels": {
     "fig5e_cue_beta": {
@@ -67,5 +90,16 @@
       "complex_title": "Complex plume",
       "y_label": "Mean log-likelihood"
     }
+  },
+  "summary_table_generation": {
+    "script": "scripts/generate_published_summary_tables.py",
+    "default_output_dir": "data/generated_summary_tables",
+    "raw_data_source": "DANDI NWB behavior files from dandiset 001871 version 0.260630.1657",
+    "produces": [
+      "fig5e_cue_beta_smooth_plume.csv",
+      "fig5e_cue_beta_complex_plume.csv",
+      "fig5f_s5_model_comparison_smooth_plume.csv",
+      "fig5f_s5_model_comparison_complex_plume.csv"
+    ]
   }
 }
