@@ -1,0 +1,5 @@
+variant,log_likelihood_mean
+grad_only,-0.5762404436677666
+joint_drop,-0.5789592756865024
+mother,-0.5761620200927323
+vel_only,-0.578887131749467

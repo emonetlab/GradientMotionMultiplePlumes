@@ -1,0 +1,71 @@
+{
+  "description": "Fixed parameters and inputs for the published GradientMotionMultiplePlumes behavior regression figure panels.",
+  "source": {
+    "data_repository": "DANDI",
+    "dandiset_id": "001871",
+    "dandiset_url": "https://dandiarchive.org/dandiset/001871",
+    "dandiset_api_url": "https://api.dandiarchive.org/api/dandisets/001871/",
+    "development_repo": "SamuelBrudner/plumeGradMotion",
+    "development_commit": "9f9730bed0eaa4a4e35dc59c518413a83e0e6dd4"
+  },
+  "analysis_filter": {
+    "timescale_ms": 200.0,
+    "x_min": 30.0,
+    "x_max": 220.0,
+    "y_min": 67.0,
+    "y_max": 97.0,
+    "behavioral_filter": "facing_upwind and walking_upwind and not near_margin",
+    "predictors": [
+      "spatial_gradient",
+      "odor_velocity",
+      "signal"
+    ],
+    "display_note": "Gradient beta is multiplied by -1 for the cue-beta display panel."
+  },
+  "panels": {
+    "fig5e_cue_beta": {
+      "script": "scripts/plot_cue_beta_paper_panel.py",
+      "smooth_table": "data/published_panel_tables/fig5e_cue_beta_smooth_plume.csv",
+      "complex_table": "data/published_panel_tables/fig5e_cue_beta_complex_plume.csv",
+      "output_stem": "fig5e_cue_beta",
+      "fig_width": 1.7,
+      "fig_height": 2.12,
+      "smooth_label": "smooth",
+      "complex_label": "complex",
+      "smooth_title": "VR\nSmooth",
+      "complex_title": "VR\nComplex",
+      "y_label": "Cue \u03b2"
+    },
+    "fig5f_cue_dominance": {
+      "script": "scripts/plot_cue_dominance_paper_panel.py",
+      "smooth_table": "data/published_panel_tables/fig5f_s5_model_comparison_smooth_plume.csv",
+      "complex_table": "data/published_panel_tables/fig5f_s5_model_comparison_complex_plume.csv",
+      "output_stem": "fig5f_cue_dominance",
+      "metric": "log_likelihood_mean",
+      "fig_width": 2.4,
+      "fig_height": 2.0,
+      "smooth_label": "smooth",
+      "complex_label": "complex",
+      "smooth_display": "Smooth",
+      "complex_display": "Complex",
+      "title": "Cue dominance per plume",
+      "y_label": "Gradient-Motion dominance",
+      "y_min": -1.0,
+      "y_max": 1.0
+    },
+    "figs5_total_differential": {
+      "script": "scripts/plot_total_differential_panels.py",
+      "smooth_table": "data/published_panel_tables/fig5f_s5_model_comparison_smooth_plume.csv",
+      "complex_table": "data/published_panel_tables/fig5f_s5_model_comparison_complex_plume.csv",
+      "output_stem": "figs5_total_differential",
+      "metric": "log_likelihood_mean",
+      "fig_width": 2.7,
+      "fig_height": 3.0,
+      "smooth_label": "smooth",
+      "complex_label": "complex",
+      "smooth_title": "Smooth plume",
+      "complex_title": "Complex plume",
+      "y_label": "Mean log-likelihood"
+    }
+  }
+}
