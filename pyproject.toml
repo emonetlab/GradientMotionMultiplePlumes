@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gradient-motion-multiple-plumes"
 version = "0.1.0"
-description = "Publication panel reproduction code for GradientMotionMultiplePlumes."
+description = "Publication figure and visualization reproduction code for GradientMotionMultiplePlumes."
 requires-python = ">=3.10"
 dependencies = [
     "matplotlib>=3.7",

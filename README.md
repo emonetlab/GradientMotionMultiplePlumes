@@ -1,6 +1,8 @@
 # GradientMotionMultiplePlumes
 
-Code to produce the published behavior-regression figure panels for the paper on fly navigational responses to odor motion and gradient cues across multiple plume environments.
+Code to produce published figure panels and quantitative visualizations for the paper on fly navigational responses to odor motion and gradient cues across multiple plume environments.
+
+This repository is intended to house the paper-facing reproduction code for multiple classes of visualizations, including plume statistics, model performance, navigation simulations, and fly behavior analyses. The currently implemented workflow reproduces the behavior-regression panels listed below.
 
 ## Data Reference
 
@@ -8,13 +10,13 @@ The source dataset is DANDI dandiset `001871`, version `0.260630.1657`:
 
 https://dandiarchive.org/dandiset/001871/0.260630.1657
 
-This repository includes the small published summary tables used to render the behavior-regression panels. It also includes code to regenerate those summary tables from the archived DANDI behavior NWB files.
+This repository includes the small published summary tables used to render the currently implemented behavior-regression panels. It also includes code to regenerate those summary tables from the archived DANDI behavior NWB files.
 
-## Published Panels
+## Implemented Panels
 
 The fixed panel parameters are recorded in `metadata/published_panel_params.json`.
 
-The included scripts produce:
+The included behavior-regression scripts produce:
 
 - `fig5e_cue_beta`: cue beta panel for smooth and complex plumes.
 - `fig5f_cue_dominance`: cue dominance panel for smooth and complex plumes.

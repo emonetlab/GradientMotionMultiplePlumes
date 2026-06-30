@@ -1,6 +1,6 @@
-# Reproduce Published Behavior Panels
+# Reproduce Published Figure Panels
 
-This repository contains the code and compact summary tables required to produce the published behavior-regression panels.
+This repository contains paper-facing code to produce published figure panels and quantitative visualizations. The currently implemented workflow reproduces the behavior-regression panels and their compact summary tables.
 
 ## Data Source
 
@@ -8,7 +8,7 @@ Full dataset: DANDI dandiset `001871`, version `0.260630.1657`
 
 https://dandiarchive.org/dandiset/001871/0.260630.1657
 
-## Regenerate Summary Tables From DANDI NWB Files
+## Behavior Panels: Regenerate Summary Tables From DANDI NWB Files
 
 Download the behavior NWB files for the smooth and complex plume experiments, reconstruct the turn-level predictors, and fit the fixed published models:
 
@@ -35,7 +35,7 @@ The generator writes:
 - `fig5f_s5_model_comparison_complex_plume.csv`
 - `summary_generation_manifest.json`
 
-## Render All Panels
+## Behavior Panels: Render All Implemented Panels
 
 ```bash
 python scripts/render_published_behavior_panels.py
@@ -43,7 +43,7 @@ python scripts/render_published_behavior_panels.py
 
 The renderer reads `metadata/published_panel_params.json` and writes PNG/PDF outputs plus per-panel metadata to `figures/published_behavior_panels/`.
 
-## Render One Panel
+## Behavior Panels: Render One Panel
 
 ```bash
 python scripts/render_published_behavior_panels.py --panel fig5e_cue_beta
@@ -51,7 +51,7 @@ python scripts/render_published_behavior_panels.py --panel fig5f_cue_dominance
 python scripts/render_published_behavior_panels.py --panel figs5_total_differential
 ```
 
-## Inputs
+## Behavior Panel Inputs
 
 Published summary tables are in `data/published_panel_tables/`:
 
@@ -60,7 +60,7 @@ Published summary tables are in `data/published_panel_tables/`:
 - `fig5f_s5_model_comparison_smooth_plume.csv`
 - `fig5f_s5_model_comparison_complex_plume.csv`
 
-## Fixed Published Parameters
+## Behavior Panel Parameters
 
 The parameters used by the summary-table generator and render commands are stored in `metadata/published_panel_params.json`:
 
