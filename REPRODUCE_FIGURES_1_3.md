@@ -12,7 +12,7 @@ conda activate gradient_motion_multiple_plumes
 pip install -e ".[figures123,test]"
 ```
 
-PyTorch is needed only to extract Figure 3 summaries from checkpoints. Rendering existing summaries does not import PyTorch.
+PyTorch is needed to train Figure 3 models or extract summaries from checkpoints. Rendering existing summaries does not import PyTorch.
 
 ## Figure 1
 
@@ -128,16 +128,133 @@ The published complex error bars were explicit notebook hardcodes and differ fro
 
 ## Figure 3
 
+### Legacy-array contract
+
+Training starts from the precomputed NumPy arrays used by the archived source. For each plume, supply all four files:
+
+| File | Full-data shape | Role |
+|---|---:|---|
+| `train_data_R1.npy` | `(2_400_000, 30, 1, 2)` | Bilateral 0.5-second training histories |
+| `train_labels_R1.npy` | `(2_400_000,)` | Binary centerline-side labels |
+| `test_data_R1.npy` | `(600_000, 30, 1, 2)` | Bilateral test histories |
+| `test_labels_R1.npy` | `(600_000,)` | Binary test labels |
+
+Labels may instead have shape `(N, 1)`, but every value must be 0 or 1 and the training set must contain both classes. Sample channel 0 is the right antenna and channel 1 is the left antenna. The literal archived transform is `log(max(I - 5, 0) + 1)`. Minimal-model training and final evaluation first apply `nan_to_num`; archived dense-model training did not, so the trainer preserves that asymmetry and fails clearly if it produces a non-finite loss. Dense inputs concatenate all 30 right-channel values followed by all 30 left-channel values; a plain reshape would interleave the channels and is not equivalent.
+
+The model repeat and the data repeat are different concepts. Every archived model initialization, including model R2, loaded the files ending in `R1.npy`. R2 is a second model initialization, not a request for `train_data_R2.npy`.
+
+The trainer memory-maps the NPY files and preprocesses one batch at a time. `--max-train-samples` and `--max-test-samples` are useful for smoke tests, but a checkpoint trained with either limit is not a full-data Figure 3 model.
+
+### Train compatible models
+
+The following four commands create all six checkpoint roles used by Figure 3. The two R1 commands train both model types; the two R2 commands train only the minimal model. The explicit seeds match the CLI defaults of `repeat - 1`.
+
+```bash
+# Smooth R1: minimal and dense
+python scripts/train_figure3_models.py \
+  --train-data data/raw/figure3/smooth/train_data_R1.npy \
+  --train-labels data/raw/figure3/smooth/train_labels_R1.npy \
+  --test-data data/raw/figure3/smooth/test_data_R1.npy \
+  --test-labels data/raw/figure3/smooth/test_labels_R1.npy \
+  --plume smooth \
+  --models minimal dense \
+  --profile archived-source \
+  --repeat 1 --seed 0 \
+  --hash-inputs \
+  --output-root data/generated/figure3_models
+
+# Complex R1: minimal and dense
+python scripts/train_figure3_models.py \
+  --train-data data/raw/figure3/complex/train_data_R1.npy \
+  --train-labels data/raw/figure3/complex/train_labels_R1.npy \
+  --test-data data/raw/figure3/complex/test_data_R1.npy \
+  --test-labels data/raw/figure3/complex/test_labels_R1.npy \
+  --plume complex \
+  --models minimal dense \
+  --profile archived-source \
+  --repeat 1 --seed 0 \
+  --hash-inputs \
+  --output-root data/generated/figure3_models
+
+# Smooth R2: minimal probe model only
+python scripts/train_figure3_models.py \
+  --train-data data/raw/figure3/smooth/train_data_R1.npy \
+  --train-labels data/raw/figure3/smooth/train_labels_R1.npy \
+  --test-data data/raw/figure3/smooth/test_data_R1.npy \
+  --test-labels data/raw/figure3/smooth/test_labels_R1.npy \
+  --plume smooth \
+  --models minimal \
+  --profile archived-source \
+  --repeat 2 --seed 1 \
+  --hash-inputs \
+  --output-root data/generated/figure3_models
+
+# Complex R2: minimal probe model only
+python scripts/train_figure3_models.py \
+  --train-data data/raw/figure3/complex/train_data_R1.npy \
+  --train-labels data/raw/figure3/complex/train_labels_R1.npy \
+  --test-data data/raw/figure3/complex/test_data_R1.npy \
+  --test-labels data/raw/figure3/complex/test_labels_R1.npy \
+  --plume complex \
+  --models minimal \
+  --profile archived-source \
+  --repeat 2 --seed 1 \
+  --hash-inputs \
+  --output-root data/generated/figure3_models
+```
+
+These commands produce:
+
+```text
+data/generated/figure3_models/
+  minimal/smooth/R1/model.pth
+  minimal/smooth/R2/model.pth
+  minimal/complex/R1/model.pth
+  minimal/complex/R2/model.pth
+  dense/smooth/R1/model.pth
+  dense/complex/R1/model.pth
+```
+
+The default `archived-source` profile follows the values actually executed by the preprint-era source:
+
+| Model | Plume | Epochs | Batch size | Adam learning rate |
+|---|---|---:|---:|---:|
+| Minimal | Smooth or complex | 300 | 100 | `1e-5` |
+| Dense | Smooth | 500 | 500 | `1e-5` |
+| Dense | Complex | 500 | 500 | `1e-4` |
+
+The paper Methods instead state 500 epochs, batch size 500, and learning rate `1e-4` for every model and plume. Select those values with `--profile paper-methods`. The differences are retained as named profiles because neither should be silently presented as the other. Individual values can be overridden with `--minimal-epochs`, `--minimal-batch-size`, `--minimal-learning-rate`, and the corresponding `--dense-*` options; all resolved values are recorded in the run metadata.
+
+For source-like ordering, the default leaves samples unshuffled. `--shuffle` is an intentional departure. The default device is CPU with one Torch thread. `--device auto`, `--device cuda`, or another supported PyTorch device can accelerate training, but numerical results are not guaranteed to be bit-identical across devices or PyTorch versions.
+
+Each run directory contains:
+
+- `model.pth`: final raw CPU `state_dict`, directly accepted by `generate_figure3_summary.py`;
+- `model_init.pth`: seeded initial state after the extra parameter reset used by the archived trainer;
+- `train_loss.pth`: one mean loss per completed epoch;
+- `training_state.pth`: model, optimizer, loss history, and NumPy/Torch/CUDA RNG state for resuming; and
+- `training_metadata.json`: input shapes and dtypes, class counts, resolved configuration, effective sample counts, final test metrics, runtime versions, hashes, and provenance notes.
+
+`training_state.pth` is updated atomically after every epoch. To continue an interrupted run, reissue the same command with `--resume`; the target epoch count may be increased, but the training inputs, hash mode, resolved device, runtime versions, and other training settings must match. In a combined minimal/dense invocation, `--resume` continues model directories that have state and starts requested model directories that have not yet been created; an inconsistent partial directory still fails safely. Use `--overwrite` to discard existing artifacts and restart. Without either option, existing output files cause a failure instead of being replaced.
+
+Only one trainer may write a run directory at a time; a concurrent invocation fails before touching training artifacts, and the operating system releases the lock if the process exits. Final evaluation and input-integrity checks occur before replacing `model.pth`. The metadata file is published last as the completion marker, so an interrupted final publication cannot present a new checkpoint with stale `status: complete` metadata.
+
+Resume granularity is one epoch. An interruption within an epoch repeats that epoch from its beginning; with the full arrays, an archived-source epoch contains 24,000 minimal-model batches or 4,800 dense-model batches. The original dense trainer also evaluated test cross-entropy after every epoch and saved validation/prediction artifacts. Those observations never affected optimization or checkpoint selection, so this checkpoint-focused routine evaluates once at the final epoch and does not claim full legacy artifact parity.
+
+The initial and final checkpoint SHA-256 values are always recorded. Input hashing is also enabled by default; the four commands use `--hash-inputs` to make that archival choice explicit. Input identity and hashes are captured before training and checked again afterward. Use `--no-hash-inputs` when the additional full-file I/O over the large NPY arrays is undesirable; their paths, shapes, dtypes, sizes, and modification times are still checked, but their SHA-256 fields are null. The selected seed, initialization reset, CPU-thread count, deterministic-algorithm flag, cuDNN setting, and CUDA workspace configuration are also recorded. The archived source did not seed NumPy or PyTorch, so a new seeded R1 or R2 run is a deterministic reimplementation, not the recovered publication initialization.
+
+### Generate and render the summary
+
 Generate a compact summary from the six checkpoint roles used by the notebook:
 
 ```bash
 python scripts/generate_figure3_summary.py \
-  --minimal-smooth /path/minimal_smooth_R1/model.pth \
-  --minimal-complex /path/minimal_complex_R1/model.pth \
-  --minimal-smooth-probe /path/minimal_smooth_R2/model.pth \
-  --minimal-complex-probe /path/minimal_complex_R2/model.pth \
-  --dense-smooth /path/dense_smooth_R1/model.pth \
-  --dense-complex /path/dense_complex_R1/model.pth \
+  --minimal-smooth data/generated/figure3_models/minimal/smooth/R1 \
+  --minimal-complex data/generated/figure3_models/minimal/complex/R1 \
+  --minimal-smooth-probe data/generated/figure3_models/minimal/smooth/R2 \
+  --minimal-complex-probe data/generated/figure3_models/minimal/complex/R2 \
+  --dense-smooth data/generated/figure3_models/dense/smooth/R1 \
+  --dense-complex data/generated/figure3_models/dense/complex/R1 \
   --seed 0 \
   --output data/generated/figure3_summary.npz
 
@@ -147,7 +264,11 @@ python scripts/render_published_figure3.py \
 
 The original synthetic probes did not set a random seed; this implementation defaults to seed 0 and records it in the summary metadata. The minimal filter/AUC panels used initialization R1, while its synthetic-response panels used R2. Dense panels used R1.
 
-The minimal checkpoints and center-shifted complex dense checkpoint were not found in source commit `659d0c3` or the Dryad/DANDI deposits inspected on 2026-07-13. A locally discovered older sparse dense checkpoint produces AUC 0.610 rather than the published 0.543 and is not a valid substitute. The generator requires all six roles and fails on missing or shape-incompatible checkpoints rather than fabricating curves. Recorded SHA-256 values identify user-supplied inputs; they do not authenticate a checkpoint as the one used for publication.
+The summary generator defaults to dense first-layer units 3 and 11 for smooth and 1 and 12 for complex because those units were selected in the publication checkpoints. Hidden units are permutation-equivalent, so these fixed indices are not meaningful for a newly trained dense model. Each dense run's `training_metadata.json` contains `suggested_dense_units_by_weight_norm`. Inspect the suggested filters, then pass the chosen indices with `--dense-smooth-units UNIT_A UNIT_B` and `--dense-complex-units UNIT_A UNIT_B`. The summary metadata records the selected indices. The norm-ranked suggestions are an auditable starting point, not a claim that they reproduce the publication's hand-selected filters.
+
+The legacy train/test arrays, threshold masks, minimal checkpoints, and center-shifted complex dense checkpoint were not found in source commit `659d0c3` or the Dryad/DANDI deposits inspected on 2026-07-13. The public complex DANDI movie begins at full-video frame 300, whereas archived neural-network training clips begin at frame 240. The committed data generator also has execution errors and an effective Gaussian sigma of 1.0 despite the configured and Methods value of 1.5. Consequently, neither the public movies nor the committed generator provide an authenticated route to the missing arrays. A locally discovered older sparse dense checkpoint produces AUC 0.610 rather than the published 0.543 and is not a valid substitute.
+
+The trainer can generate checkpoint-compatible models when the legacy arrays are supplied, but it cannot recover the missing publication initialization, guarantee the published AUCs, or make a newly selected pair of dense filters identical to the plotted pair. The summary generator requires all six roles and fails on missing or shape-incompatible checkpoints rather than fabricating curves. Recorded SHA-256 values identify supplied files; hashes do not authenticate their publication role.
 
 ## Render several figures
 
