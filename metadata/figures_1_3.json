@@ -128,6 +128,99 @@
       "smooth": [3, 11],
       "complex": [1, 12]
     },
+    "training": {
+      "script": "scripts/train_figure3_models.py",
+      "source_commit": "659d0c3c34a8ab0f05abd76b38756debd4ea9214",
+      "archived_source_paths": [
+        "models/train_validate_run.py",
+        "models/train_validate.py",
+        "models/train_validate_run_dense_local.py",
+        "models/train_validate_local.py",
+        "configs/configs_model.py",
+        "configs/configs_model_diffusive_dense.py",
+        "configs/configs_model_sparse_1a_centershifted_dense.py",
+        "helper/helper_functions.py",
+        "data_processing/create_training_data.py"
+      ],
+      "input_contract": {
+        "files_per_plume": [
+          "train_data_R1.npy",
+          "train_labels_R1.npy",
+          "test_data_R1.npy",
+          "test_labels_R1.npy"
+        ],
+        "training_data_shape": [2400000, 30, 1, 2],
+        "test_data_shape": [600000, 30, 1, 2],
+        "accepted_label_shapes": ["(N,)", "(N, 1)"],
+        "label_values": [0, 1],
+        "antenna_channels": {
+          "0": "right",
+          "1": "left"
+        },
+        "model_repeat_note": "Every archived R1/R2 model initialization consumed data repeat R1; model R2 does not use train_data_R2.npy.",
+        "preprocessing": "log(max(I - 5, 0) + 1); minimal training and final evaluation apply nan_to_num first, while archived dense training did not",
+        "dense_layout": "30 right-channel samples followed by 30 left-channel samples"
+      },
+      "profiles": {
+        "archived-source": {
+          "description": "Defaults executed by the preprint-era source rather than the values stated uniformly in Methods.",
+          "minimal_smooth": {
+            "epochs": 300,
+            "batch_size": 100,
+            "learning_rate": 1e-05
+          },
+          "minimal_complex": {
+            "epochs": 300,
+            "batch_size": 100,
+            "learning_rate": 1e-05
+          },
+          "dense_smooth": {
+            "epochs": 500,
+            "batch_size": 500,
+            "learning_rate": 1e-05
+          },
+          "dense_complex": {
+            "epochs": 500,
+            "batch_size": 500,
+            "learning_rate": 0.0001
+          }
+        },
+        "paper-methods": {
+          "description": "Values stated in the paper Methods for both model types and plume types.",
+          "all_models": {
+            "epochs": 500,
+            "batch_size": 500,
+            "learning_rate": 0.0001
+          }
+        }
+      },
+      "checkpoint_roles": {
+        "minimal_smooth_R1": "filter panel and checkpoint-derived values",
+        "minimal_complex_R1": "filter panel and checkpoint-derived values",
+        "minimal_smooth_R2": "gradient and motion probes",
+        "minimal_complex_R2": "gradient and motion probes",
+        "dense_smooth_R1": "filters, gradient probes, and motion probes",
+        "dense_complex_R1": "filters, gradient probes, and motion probes"
+      },
+      "output_layout": "data/generated/figure3_models/{minimal|dense}/{smooth|complex}/R{repeat}/",
+      "output_artifacts": {
+        "model.pth": "Final raw CPU state_dict accepted by generate_figure3_summary.py.",
+        "model_init.pth": "Seeded initial state after the extra reset used by the archived source.",
+        "train_loss.pth": "Mean training loss for every completed epoch.",
+        "training_state.pth": "Model, optimizer, losses, and RNG state used by --resume.",
+        "training_metadata.json": "Resolved configuration, array contract and hashes, metrics, runtime, checkpoint hashes, and provenance; published last as the coherent-artifact completion marker."
+      },
+      "reproducibility": {
+        "default_profile": "archived-source",
+        "default_seed_rule": "repeat - 1 (R1 uses seed 0 and R2 uses seed 1)",
+        "input_hashing_default": true,
+        "source_seed_note": "The archived training code did not set NumPy or PyTorch seeds; seeded runs are deterministic reimplementations, not recovered R1/R2 initializations.",
+        "resume_note": "Resume requires intact training_state.pth and model_init.pth files plus matching training inputs, hash mode, resolved device, runtime versions, and configuration except for the epoch target. A combined invocation starts any requested model directory that has not yet begun. State is saved at epoch boundaries.",
+        "hash_note": "Final and initial checkpoints are always SHA-256 hashed. Input arrays are hashed by default; --no-hash-inputs records null SHA-256 fields to avoid the additional full-file I/O.",
+        "publication_note": "Each run directory has a crash-released exclusive writer lock. Evaluation and input verification precede final artifact replacement, and training_metadata.json is published last as the completion marker.",
+        "dense_unit_note": "Published dense units [3,11] for smooth and [1,12] for complex are checkpoint-specific. New runs record two suggested first-layer units ranked by weight norm; users must pass or confirm suitable indices when extracting a retrained checkpoint."
+      }
+    },
     "published_auc": {
       "minimal_smooth": 0.726,
       "minimal_complex": 0.517,
@@ -152,6 +245,6 @@
       "The smooth DNM notebook learning rate differs from the Methods description.",
       "The smooth DNM notebook annotates AUC 0.734; the paper and local diagnostic round to 0.735."
     ],
-    "known_input_gap": "The MNM R1/R2 checkpoints and center-shifted complex DNM R1 checkpoint used for Figure 3 were not found in source commit 659d0c3 or the Dryad/DANDI deposits inspected as of 2026-07-13. An exact smooth DNM R1 checkpoint was located locally for diagnostic validation but is not checked into this repository. Exact data-derived panels require the missing files."
+    "known_input_gap": "The legacy train/test arrays, threshold masks, MNM R1/R2 checkpoints, and center-shifted complex DNM R1 checkpoint used for Figure 3 were not found in source commit 659d0c3 or the Dryad/DANDI deposits inspected as of 2026-07-13. The public complex DANDI movie starts at full-video frame 300, while archived neural-network training clips start at frame 240. The committed data generator also has execution and Gaussian-sigma discrepancies, so it is not an authenticated route to the missing arrays. An exact smooth DNM R1 checkpoint was located locally for diagnostic validation but is not checked into this repository. The training routine therefore produces compatible new models only when users supply legacy arrays; it cannot recover the exact publication artifacts."
   }
 }

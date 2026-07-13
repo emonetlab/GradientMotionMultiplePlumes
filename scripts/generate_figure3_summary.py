@@ -64,6 +64,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dense-complex", type=Path, required=True, help="R1 dense checkpoint."
     )
+    parser.add_argument(
+        "--dense-smooth-units",
+        type=int,
+        nargs=2,
+        metavar=("UNIT_A", "UNIT_B"),
+        default=(3, 11),
+        help="First-layer units to display (publication-checkpoint default: 3 11).",
+    )
+    parser.add_argument(
+        "--dense-complex-units",
+        type=int,
+        nargs=2,
+        metavar=("UNIT_A", "UNIT_B"),
+        default=(1, 12),
+        help="First-layer units to display (publication-checkpoint default: 1 12).",
+    )
     parser.add_argument("--motion-samples", type=int, default=100_000)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=8192)
@@ -124,6 +140,12 @@ def main() -> int:
         raise ValueError("--batch-size must be >= 1.")
     if args.motion_samples < 1:
         raise ValueError("--motion-samples must be >= 1.")
+    for name, units in (
+        ("--dense-smooth-units", args.dense_smooth_units),
+        ("--dense-complex-units", args.dense_complex_units),
+    ):
+        if len(set(units)) != 2 or any(unit < 0 or unit >= 20 for unit in units):
+            raise ValueError(f"{name} requires two distinct indices from 0 through 19.")
     paths = {
         "minimal_smooth": checkpoint_path(args.minimal_smooth),
         "minimal_complex": checkpoint_path(args.minimal_complex),
@@ -162,12 +184,16 @@ def main() -> int:
         .cpu()
         .numpy()
         .T,
-        "dense_smooth_filters": dense_smooth_state["dense_layers.0.weight"][[3, 11]]
+        "dense_smooth_filters": dense_smooth_state["dense_layers.0.weight"][
+            list(args.dense_smooth_units)
+        ]
         .detach()
         .cpu()
         .numpy()
         .reshape(2, 2, 30),
-        "dense_complex_filters": dense_complex_state["dense_layers.0.weight"][[1, 12]]
+        "dense_complex_filters": dense_complex_state["dense_layers.0.weight"][
+            list(args.dense_complex_units)
+        ]
         .detach()
         .cpu()
         .numpy()
@@ -251,6 +277,10 @@ def main() -> int:
         "seed": args.seed,
         "motion_samples_per_shift": args.motion_samples,
         "batch_size": args.batch_size,
+        "dense_units": {
+            "smooth": list(args.dense_smooth_units),
+            "complex": list(args.dense_complex_units),
+        },
         "checkpoint_note": "MNM filter panels use R1, while the preprint's MNM probe panels used R2.",
         "checkpoint_authentication": "SHA-256 values identify supplied files but do not authenticate their publication role.",
         "checkpoints": {
