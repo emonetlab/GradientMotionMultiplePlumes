@@ -1,5 +1,7 @@
 # Reproduce Published Behavior Panels
 
+For Figures 1--3, see [`REPRODUCE_FIGURES_1_3.md`](REPRODUCE_FIGURES_1_3.md).
+
 This repository contains the code and compact summary tables required to produce the published behavior-regression panels.
 
 ## Data Source

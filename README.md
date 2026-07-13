@@ -1,58 +1,43 @@
 # GradientMotionMultiplePlumes
 
-Code to produce the published behavior-regression figure panels for the paper on fly navigational responses to odor motion and gradient cues across multiple plume environments.
+Publication code for *Fly navigational responses to odor motion and gradient cues are tuned to plume statistics* ([bioRxiv v1](https://doi.org/10.1101/2025.03.31.646361)).
 
-## Data Reference
+This repository now contains scripted, tested pipelines for Figures 1, 2, and 3 in addition to the published behavior-regression panels. The Figure 1 and 3 pipelines deliberately keep large movies and model checkpoints outside Git; their renderers consume compact, provenance-carrying NPZ summaries.
 
-The source dataset is DANDI dandiset `001871`, version `0.260630.1657`:
+## Reproduction status
 
-https://dandiarchive.org/dandiset/001871/0.260630.1657
+| Figure | Included code | External requirement |
+|---|---|---|
+| 1 | Plume conversion, finite-difference gradient/motion maps, streaming temporal statistics, and a programmatic all-panel layout | Public Dryad/DANDI movies; the published complex frame-2900 snapshot needs the full original background-subtracted movie |
+| 2 | Published B--E values, a programmatic A schematic, and memory-bounded GLM refitting | Nothing for the published-value renderer; legacy train/test arrays only for refitting |
+| 3 | Checkpoint-compatible MNM/DNM definitions, seeded probes, summary extraction, and a programmatic all-panel layout | The MNM and center-shifted complex DNM checkpoints used by the notebook were not found in the inspected sources |
 
-This repository includes the small published summary tables used to render the behavior-regression panels. It also includes code to regenerate those summary tables from the archived DANDI behavior NWB files.
+Panels that were originally assembled as artwork are represented by new programmatic schematics. Quantitative panels implement the archived equations and checked-in values where those values are available. Figure 3 probes are seeded for repeatability, unlike the unseeded notebook, and exact rendering remains checkpoint-dependent. The discrepancies and missing artifacts established during reconstruction are recorded in [`metadata/figures_1_3.json`](metadata/figures_1_3.json).
 
-## Published Panels
-
-The fixed panel parameters are recorded in `metadata/published_panel_params.json`.
-
-The included scripts produce:
-
-- `fig5e_cue_beta`: cue beta panel for smooth and complex plumes.
-- `fig5f_cue_dominance`: cue dominance panel for smooth and complex plumes.
-- `figs5_total_differential`: total/differential model-comparison panels for each plume.
-
-## Quick Start
-
-Render the checked-in published summary tables:
+## Quick start
 
 ```bash
 conda env create -f environment.yml
-conda run -n gradient_motion_multiple_plumes python scripts/render_published_behavior_panels.py
+conda activate gradient_motion_multiple_plumes
+pip install -e ".[figures123,test]"  # adds PyTorch for Figure 3 extraction
+python scripts/render_published_figure2.py
+python -m pytest -q
 ```
 
-Regenerate the summary tables from DANDI behavior NWB files:
+Figure 2 writes editable PDF and PNG output to `figures/published_figures_1_3/`. See [`REPRODUCE_FIGURES_1_3.md`](REPRODUCE_FIGURES_1_3.md) for Figure 1 public-data commands and the Figure 3 checkpoint contract.
+
+## Behavior-regression panels
+
+The existing Figure 5E/F and Figure S5 workflow remains available:
 
 ```bash
-conda run -n gradient_motion_multiple_plumes python scripts/generate_published_summary_tables.py \
-  --download-dandi \
-  --dandi-cache data/dandi_cache/001871 \
-  --output-dir data/generated_summary_tables
+python scripts/render_published_behavior_panels.py
 ```
 
-Render panels from regenerated summary tables by passing those CSVs to the panel scripts, or replace the checked-in `data/published_panel_tables/*.csv` after verifying the generated values.
+The behavior source is [DANDI dandiset 001871, version 0.260630.1657](https://dandiarchive.org/dandiset/001871/0.260630.1657). Compact published tables are checked in, and `scripts/generate_published_summary_tables.py` can regenerate them from the archived behavior NWB files. See [`REPRODUCE.md`](REPRODUCE.md).
 
-Outputs are written to `figures/published_behavior_panels/` by default.
+## Provenance
 
-## Panel Parameters
+The Figure 1--3 implementation was reconstructed against the preprint and the preprint-era source revision [`659d0c3`](https://github.com/ClarkLabCode/OdorMotionMLdev/commit/659d0c3c34a8ab0f05abd76b38756debd4ea9214). The original repository has no declared software license, so this repository uses a focused reimplementation of the published equations and parameters rather than copying the notebooks wholesale. Missing-file statements are scoped to that revision and the Dryad/DANDI deposits inspected on 2026-07-13.
 
-The published behavior panels use:
-
-- Time scale: `200 ms`
-- Predictor lookup: `50 ms` before turn start
-- Horizontal position: `30 <= x <= 220 mm`
-- Vertical position: `67 <= y <= 97 mm`
-- Behavioral filter: `facing_upwind and walking_upwind and not near_margin`
-- Predictors: `spatial_gradient`, `odor_velocity`, and `signal`
-- Smooth plume facing-upwind window: `160 <= theta <= 200 degrees`
-- Complex plume facing-upwind window: `150 <= theta <= 210 degrees`
-
-For the cue beta display, the gradient beta is multiplied by `-1`, as recorded in `metadata/published_panel_params.json`.
+The DANDI inputs are attributed as: Brudner, Samuel (2026), *Data for fly navigational responses exploiting plume-specific odor motion and gradient cues*, version 0.260630.1657, DANDI Archive, [doi:10.48324/dandi.001871/0.260630.1657](https://doi.org/10.48324/dandi.001871/0.260630.1657), CC BY 4.0. Smooth-plume data come from [Dryad doi:10.5061/dryad.g27mq71](https://doi.org/10.5061/dryad.g27mq71), CC0.

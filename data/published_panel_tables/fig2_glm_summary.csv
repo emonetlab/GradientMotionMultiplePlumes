@@ -1,0 +1,7 @@
+plume,feature,auc_mean,auc_sd,weight_mean,weight_sd,repeats
+smooth,sum,0.500,0.000,0.000,0.000,100
+smooth,gradient,0.846,0.008,2.614,0.184,100
+smooth,motion,0.541,0.003,0.061,0.006,100
+complex,sum,0.500,0.000,0.000,0.000,100
+complex,gradient,0.537,0.012,0.098,0.041,100
+complex,motion,0.618,0.005,0.403,0.034,100

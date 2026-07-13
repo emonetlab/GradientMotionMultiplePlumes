@@ -1,0 +1,157 @@
+{
+  "paper": {
+    "title": "Fly navigational responses to odor motion and gradient cues are tuned to plume statistics",
+    "preprint_doi": "10.1101/2025.03.31.646361",
+    "preprint_version": "v1",
+    "posted": "2025-04-03"
+  },
+  "source_code": {
+    "repository": "https://github.com/ClarkLabCode/OdorMotionMLdev",
+    "preprint_commit": "659d0c3c34a8ab0f05abd76b38756debd4ea9214",
+    "figure1_paths": [
+      "figures/Figure1_plume_distribution_newplume.ipynb",
+      "figures/Figure1_plume_distribution_1a.ipynb",
+      "figures/Plume_distribution_whole_movie.ipynb",
+      "figures/Plume_distribution_whole_movie_complex_1a.ipynb",
+      "data_processing/whole_movie_processing.py"
+    ],
+    "figure2_paths": [
+      "figures/Figure2_GLM.ipynb",
+      "figures/Figure2_GLM_1a_centershifted.ipynb",
+      "models/models.py"
+    ],
+    "figure3_paths": [
+      "figures/Figure3_NNM.ipynb",
+      "figures/Figure3_NNM_1a_centershifted.ipynb",
+      "figures/dense_networks.ipynb",
+      "figures/dense_networks_1a_centershifted.ipynb",
+      "models/models.py"
+    ]
+  },
+  "palette": {
+    "smooth": [0.5803921569, 0.4039215686, 0.7411764706],
+    "complex": [0.7372549020, 0.7411764706, 0.1333333333],
+    "gradient": [1.0, 0.4980392157, 0.0549019608],
+    "motion": [0.1725490196, 0.6274509804, 0.1725490196],
+    "right": [0.8901960784, 0.4666666667, 0.7607843137],
+    "left": [0.5490196078, 0.3372549020, 0.2941176471]
+  },
+  "figure1": {
+    "map_sigma_px": 0.0,
+    "cue_snapshot_sigma_px": 1.5,
+    "snapshot_sigma_px": 3.0,
+    "crosswind_image_axis": 0,
+    "motion_equation": "-(dI/dy)(dI/dt), with centered one-frame differences",
+    "map_window": {
+      "start_inclusive": 300,
+      "stop_exclusive": 1800,
+      "gradient_samples": 1500,
+      "motion_samples": 1498,
+      "note": "The preprint-era whole_movie_processing.py hard-coded this window for both plume types. Gradient statistics use every frame; motion uses frames with both temporal neighbors."
+    },
+    "snapshot_frames": {
+      "plume": {
+        "smooth": 601,
+        "complex": 2900
+      },
+      "cue_center": {
+        "smooth": 602,
+        "complex": 2901
+      },
+      "note": "The notebook calls each snapshot routine at the plume frame and computes cue panels from that frame plus the next two."
+    },
+    "intensity_profiles": {
+      "legacy_complex_avi": 2.125,
+      "dandi_complex_nwb": 1.0,
+      "note": "The DANDI scratch frames are already calibrated to a legacy-like 0-255 range; do not apply the AVI multiplier twice."
+    },
+    "display_limits": {
+      "smooth_gradient_snapshot": 1.0,
+      "complex_gradient_snapshot": 2.0,
+      "smooth_motion_snapshot": 0.3,
+      "complex_motion_snapshot": 4.0,
+      "gradient_zscore": 0.5,
+      "motion_zscore": 0.5
+    },
+    "public_inputs": {
+      "smooth": {
+        "repository": "Dryad",
+        "doi": "10.5061/dryad.g27mq71",
+        "file": "10302017_10cms_bounded_2.h5",
+        "file_id": 11167,
+        "dataset": "/dataset2",
+        "shape": [3600, 406, 216],
+        "source_fps": 15,
+        "file_md5": "cf3cadd8a9b53c2a3f6d3aca37f71a62",
+        "license": "CC0-1.0",
+        "conversion_note": "The committed conversion notebook and the configured published AVI differ by filename; both legacy endpoint alignment and corrected timestamp profiles are implemented."
+      },
+      "complex_maps": {
+        "repository": "DANDI",
+        "dandiset": "001871",
+        "version": "0.260630.1657",
+        "asset_id": "5e60d590-b1c1-4830-bb38-a36f6d967e75",
+        "path": "sub-figs1-complex-smoke-1a/sub-figs1-complex-smoke-1a_ses-figure-s1_image.nwb",
+        "dataset": "/scratch/smoke_1a_orig_figs1_background_subtracted_window_frames",
+        "shape": [1500, 1088, 1728],
+        "full_video_frame_offset": 300,
+        "full_video_stop_exclusive": 1800,
+        "license": "CC-BY-4.0",
+        "citation": "Brudner, Samuel (2026) Data for fly navigational responses exploiting plume-specific odor motion and gradient cues (Version 0.260630.1657) [Data set]. DANDI Archive. https://doi.org/10.48324/dandi.001871/0.260630.1657"
+      }
+    },
+    "known_input_gap": "The public DANDI Figure S1 complex window contains raw frames 300-1799 and can reproduce the temporal maps, but not the published Figure 1 complex snapshot at full-video frame 2900. The full background-subtracted sequence was not found in the inspected Dryad/DANDI deposits as of 2026-07-13."
+  },
+  "figure2": {
+    "history_frames": 30,
+    "history_seconds": 0.5,
+    "frame_rate_hz": 60,
+    "motion_delay_frames": 1,
+    "training_samples_per_repeat": 2400000,
+    "test_samples_per_repeat": 600000,
+    "published_repeats": 100,
+    "intensity_transform": "log(1 + max(I - 5, 0))",
+    "summary_table": "data/published_panel_tables/fig2_glm_summary.csv",
+    "legacy_array_channels": ["right", "left"],
+    "legacy_sum_note": "The executable source used 0.5*mean(R+L), while the manuscript formula displays mean(L+R). Training standardization makes the fitted standardized weights and AUC invariant to this positive scaling.",
+    "legacy_sanitation": "np.nan_to_num was applied before the log-threshold transform.",
+    "legacy_feature_sign_note": "The executable source used R-L and R(t)L(t+d)-R(t+d)L(t), opposite the displayed manuscript formulas if L/R are read literally.",
+    "hardcoded_error_note": "The plotted complex error bars differ from standard deviations printed from loaded arrays; the summary table preserves the plotted hardcodes."
+  },
+  "figure3": {
+    "history_frames": 30,
+    "frame_rate_hz": 60,
+    "minimal_architecture": "antisymmetric Conv2d(30, 1, kernel=(1,2)) with ReLU",
+    "dense_architecture": [60, 20, 20, 2],
+    "dense_schematic_note": "The published conceptual schematic shows one scalar before sigmoid; the archived checkpoint implementation has two output logits whose difference defines that scalar.",
+    "dense_selected_units": {
+      "smooth": [3, 11],
+      "complex": [1, 12]
+    },
+    "published_auc": {
+      "minimal_smooth": 0.726,
+      "minimal_complex": 0.517,
+      "dense_smooth": 0.735,
+      "dense_complex": 0.543
+    },
+    "validation_artifact": {
+      "dense_smooth_r1_sha256": "d389c8c6a3d44146a731ced518d15a384697c128a1feb5dce50be084c7c32ee7",
+      "evaluated_auc": 0.7349880704611113,
+      "note": "Unverifiable local diagnostic: the checkpoint was located locally but is not committed, and the evaluation arrays/hashes are not available in this repository."
+    },
+    "probe": {
+      "gradient_differences": [-0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+      "motion_shifts_frames": [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
+      "motion_samples_per_shift": 100000,
+      "legacy_binary_levels": [0, 2],
+      "methods_binary_levels": [0, 1],
+      "randomness_note": "The notebook did not seed its Monte Carlo motion probes; this implementation defaults to seed 0 and records it."
+    },
+    "training_discrepancies": [
+      "MNM training hyperparameters described in Methods differ from the archived model configuration.",
+      "The smooth DNM notebook learning rate differs from the Methods description.",
+      "The smooth DNM notebook annotates AUC 0.734; the paper and local diagnostic round to 0.735."
+    ],
+    "known_input_gap": "The MNM R1/R2 checkpoints and center-shifted complex DNM R1 checkpoint used for Figure 3 were not found in source commit 659d0c3 or the Dryad/DANDI deposits inspected as of 2026-07-13. An exact smooth DNM R1 checkpoint was located locally for diagnostic validation but is not checked into this repository. Exact data-derived panels require the missing files."
+  }
+}
