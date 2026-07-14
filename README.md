@@ -4,18 +4,6 @@ Publication code for *Fly navigational responses to odor motion and gradient cue
 
 This repository now contains scripted, tested pipelines for Figures 1, 2, and 3 in addition to the published behavior-regression panels. The Figure 1 and 3 pipelines deliberately keep large movies and model checkpoints outside Git; their renderers consume compact, provenance-carrying NPZ summaries.
 
-## Reproduction status
-
-| Figure | Included code | External requirement |
-|---|---|---|
-| 1 | Plume conversion, finite-difference gradient/motion maps, streaming temporal statistics, and a programmatic all-panel layout | Public Dryad/DANDI movies; the published complex frame-2900 snapshot needs the full original background-subtracted movie |
-| 2 | Published B--E values, a programmatic A schematic, and memory-bounded GLM refitting | Nothing for the published-value renderer; legacy train/test arrays only for refitting |
-| 3 | Checkpoint-compatible MNM/DNM definitions, memory-bounded training with resumable state, seeded probes, summary extraction, and a programmatic all-panel layout | Supplied legacy train/test arrays; the exact MNM and center-shifted complex DNM checkpoints used by the notebook were not found in the inspected sources |
-
-Panels that were originally assembled as artwork are represented by new programmatic schematics. Quantitative panels implement the archived equations and checked-in values where those values are available. Figure 3 training and probes use recorded seeds for repeatability, unlike the unseeded source. Training produces compatible new checkpoints from supplied legacy arrays; it does not recover the publication initializations or make an exact Figure 3 rendering possible without the original artifacts. The discrepancies and missing artifacts established during reconstruction are recorded in [`metadata/figures_1_3.json`](metadata/figures_1_3.json).
-
-Use `scripts/train_figure3_models.py` to train minimal and dense models with either archived-source or paper-Methods hyperparameters. The detailed guide gives four commands for the R1/R2 checkpoint layout and explains input hashing, resume behavior, and dense-filter selection.
-
 ## Quick start
 
 ```bash
