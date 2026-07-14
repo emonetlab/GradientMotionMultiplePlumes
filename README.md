@@ -28,6 +28,4 @@ The behavior source is [DANDI dandiset 001871, version 0.260630.1657](https://da
 
 ## Provenance
 
-The Figure 1--3 implementation was reconstructed against the preprint and the preprint-era source revision [`659d0c3`](https://github.com/ClarkLabCode/OdorMotionMLdev/commit/659d0c3c34a8ab0f05abd76b38756debd4ea9214). The original repository has no declared software license, so this repository uses a focused reimplementation of the published equations and parameters rather than copying the notebooks wholesale. Missing-file statements are scoped to that revision and the Dryad/DANDI deposits inspected on 2026-07-13.
-
 The DANDI inputs are attributed as: Brudner, Samuel (2026), *Data for fly navigational responses exploiting plume-specific odor motion and gradient cues*, version 0.260630.1657, DANDI Archive, [doi:10.48324/dandi.001871/0.260630.1657](https://doi.org/10.48324/dandi.001871/0.260630.1657), CC BY 4.0. Smooth-plume data come from [Dryad doi:10.5061/dryad.g27mq71](https://doi.org/10.5061/dryad.g27mq71), CC0.
